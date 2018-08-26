@@ -1,0 +1,7 @@
+name: PhatLoots
+version: ${project.version}
+main: de.articdive.phatloots.PhatLoots
+prefix: PhatLoots
+authors: [Articdive]
+description: A version of PhatLoots updated for 1.13 and optimized.
+website: https://www.articdive.de
