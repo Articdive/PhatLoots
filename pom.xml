@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.articdive</groupId>
-    <artifactId>PhatLootsReborn</artifactId>
+    <artifactId>PhatLoots</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>PhatLootsReborn</name>
+    <name>PhatLoots</name>
 
     <description>A version of PhatLoots updated for 1.13 and Optimized.</description>
     <properties>
@@ -70,10 +70,6 @@
         <repository>
             <id>sk89q-repo</id>
             <url>http://maven.sk89q.com/repo/</url>
-        </repository>
-        <repository>
-            <id>vault-repo</id>
-            <url>http://nexus.hc.to/content/repositories/pub_releases</url>
         </repository>
         <repository>
             <id>nuvotifier-repo</id>
