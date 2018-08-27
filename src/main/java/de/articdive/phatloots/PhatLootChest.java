@@ -13,8 +13,12 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
-import org.bukkit.block.NoteBlock;
 import org.bukkit.block.Skull;
+import org.bukkit.block.data.AnaloguePowerable;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Lightable;
+import org.bukkit.block.data.Powerable;
+import org.bukkit.block.data.type.Piston;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
@@ -39,15 +43,15 @@ import java.util.UUID;
  */
 public class PhatLootChest {
 	private static EnumSet<Material> untriggeredRedstone = EnumSet.of(
-			Material.REDSTONE_WIRE, Material.LEGACY_REDSTONE_COMPARATOR_OFF,
-			Material.LEGACY_REDSTONE_LAMP_OFF, Material.LEGACY_REDSTONE_TORCH_OFF,
-			Material.LEGACY_DIODE_BLOCK_OFF, Material.DISPENSER, Material.DROPPER,
-			Material.NOTE_BLOCK, Material.LEGACY_PISTON_BASE, Material.TNT
+			Material.REDSTONE_WIRE, Material.COMPARATOR,
+			Material.REDSTONE_LAMP, Material.REDSTONE_TORCH,
+			Material.REPEATER, Material.DISPENSER, Material.DROPPER,
+			Material.NOTE_BLOCK, Material.PISTON, Material.TNT
 	);
 	private static EnumSet<Material> triggeredRedstone = EnumSet.of(
-			Material.REDSTONE_WIRE, Material.LEGACY_REDSTONE_COMPARATOR_ON,
-			Material.LEGACY_REDSTONE_LAMP_ON, Material.LEGACY_REDSTONE_TORCH_ON,
-			Material.LEGACY_DIODE_BLOCK_ON, Material.LEGACY_PISTON_BASE
+			Material.REDSTONE_WIRE, Material.COMPARATOR,
+			Material.REDSTONE_LAMP, Material.REDSTONE_TORCH,
+			Material.REPEATER, Material.PISTON
 	);
 	private static HashMap<String, PhatLootChest> chests = new HashMap<>(); //Chest Location -> PhatLootChest
 	static HashSet<PhatLootChest> chestsToRespawn = new HashSet<>();
@@ -655,7 +659,12 @@ public class PhatLootChest {
 	 * @return The List of Blocks
 	 */
 	private static LinkedList<Block> findRedstone(Block block, boolean on) {
-		EnumSet redstone = on ? triggeredRedstone : untriggeredRedstone;
+		EnumSet redstone;
+		if (on) {
+			redstone = triggeredRedstone;
+		} else {
+			redstone = untriggeredRedstone;
+		}
 		LinkedList<Block> redstoneList = new LinkedList<>();
 		Block neighbor = block.getRelative(1, 0, 0);
 		if (redstone.contains(neighbor.getType())) {
@@ -747,55 +756,64 @@ public class PhatLootChest {
 	 * @param block The given Block which has redstone qualities
 	 */
 	private static void trigger(Block block) {
-		switch (block.getType()) {
-			// TODO: Find out how to fix this using the new 1.13 system
-        /*case REDSTONE_WIRE: //Toggle the power level
-            block.setData((byte) (block.getData() ^ (byte) 15), true);
-            break;*/
-			case LEGACY_REDSTONE_COMPARATOR_OFF: //Turn the Comparator on
-				block.setType(Material.LEGACY_REDSTONE_COMPARATOR_ON, true);
-				break;
-			case LEGACY_REDSTONE_LAMP_OFF: //Turn the Lamp on
-				block.setType(Material.LEGACY_REDSTONE_LAMP_ON, true);
-				break;
-			case LEGACY_REDSTONE_TORCH_OFF: //Turn the Torch on
-				block.setType(Material.LEGACY_REDSTONE_TORCH_ON, true);
-				break;
-			case LEGACY_DIODE_BLOCK_OFF: //Turn the Diode on
-				block.setType(Material.LEGACY_DIODE_BLOCK_ON, true);
-				break;
-			case DISPENSER: //Dispense
-				((Dispenser) block.getState()).dispense();
-				break;
-			case DROPPER: //Drop
-				((Dropper) block.getState()).drop();
-				break;
-			case NOTE_BLOCK: //Play note
-				((NoteBlock) block.getState()).play();
-				break;
-			// TODO: Find out how to fix this using the new 1.13 system
-        /*(case LEGACY_PISTON_BASE: //Toggle the extended bit
-            block.set((byte) (block.getData() ^ (byte) 8), true);
-            break;*/
-			case TNT: //Replace the TNT with primed TNT
-				block.setType(Material.AIR);
-				TNTPrimed tnt = (TNTPrimed) block.getWorld().spawnEntity(block.getLocation(), EntityType.PRIMED_TNT);
-				tnt.setFuseTicks(80);
-				break;
-			case LEGACY_REDSTONE_COMPARATOR_ON: //Turn the Comparator off
-				block.setType(Material.LEGACY_REDSTONE_COMPARATOR_OFF, true);
-				break;
-			case LEGACY_REDSTONE_LAMP_ON: //Turn the Lamp off
-				block.setType(Material.LEGACY_REDSTONE_LAMP_OFF, true);
-				break;
-			case LEGACY_REDSTONE_TORCH_ON: //Turn the Torch off
-				block.setType(Material.LEGACY_REDSTONE_TORCH_OFF, true);
-				break;
-			case LEGACY_DIODE_BLOCK_ON: //Turn the Diode off
-				block.setType(Material.LEGACY_DIODE_BLOCK_OFF, true);
-				break;
-			default:
-				break;
+		BlockData data = block.getBlockData();
+		BlockState state = block.getState();
+		Material material = block.getType();
+		// TNT
+		if (material == Material.TNT) {
+			block.setType(Material.AIR);
+			TNTPrimed tnt = (TNTPrimed) block.getWorld().spawnEntity(block.getLocation(), EntityType.PRIMED_TNT);
+			tnt.setFuseTicks(80);
+			return;
+		}
+		// Dispenser
+		if (state instanceof Dispenser) {
+			((Dispenser) state).dispense();
+			return;
+		}
+		// Dropper
+		if (state instanceof Dropper) {
+			((Dropper) state).drop();
+			return;
+		}
+		// Comparator, Repeater, NoteBlock
+		if (data instanceof Powerable) {
+			if (((Powerable) data).isPowered()) {
+				((Powerable) data).setPowered(false);
+			} else if (!((Powerable) data).isPowered()) {
+				((Powerable) data).setPowered(true);
+			}
+			return;
+		}
+		// Redstone
+		if (data instanceof AnaloguePowerable) {
+			if (((AnaloguePowerable) data).getPower() != ((AnaloguePowerable) data).getMaximumPower()) {
+				((AnaloguePowerable) data).setPower(((AnaloguePowerable) data).getMaximumPower());
+			} else {
+				if (((AnaloguePowerable) data).getPower() == ((AnaloguePowerable) data).getMaximumPower()) {
+					((AnaloguePowerable) data).setPower(0);
+				}
+			}
+			return;
+		}
+		// Restone Lamp, Redstone Torch
+		if (material == Material.REDSTONE_LAMP || material == Material.REDSTONE_TORCH || material == Material.REDSTONE_WALL_TORCH) {
+			if (data instanceof Lightable) {
+				if (((Lightable) data).isLit()) {
+					((Lightable) data).setLit(false);
+				} else if (!((Lightable) data).isLit()) {
+					((Lightable) data).setLit(true);
+				}
+			}
+			return;
+		}
+		// Piston
+		if (data instanceof Piston) {
+			if (((Piston) data).isExtended()) {
+				((Piston) data).setExtended(false);
+			} else if (!((Piston) data).isExtended()) {
+				((Piston) data).setExtended(true);
+			}
 		}
 	}
 

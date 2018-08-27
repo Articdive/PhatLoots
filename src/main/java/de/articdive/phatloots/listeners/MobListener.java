@@ -6,15 +6,15 @@ import de.articdive.phatloots.regions.RegionHook;
 import org.bukkit.Location;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.Horse.Variant;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.entity.ZombieVillager;
 import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
@@ -61,9 +61,13 @@ public abstract class MobListener implements Listener {
 	public PhatLoot getPhatLoot(LivingEntity entity) {
 		//First check for a PhatLoot matching the mob's custom name
 		if (namedMobs) {
-			String name = entity instanceof HumanEntity
-					? ((HumanEntity) entity).getName() //NPC or Player
-					: entity.getCustomName(); //Mob
+			String name; //Mob
+			// NPC or Player
+			if (entity instanceof HumanEntity) {
+				name = entity.getName();
+			} else {
+				name = entity.getCustomName();
+			}
 			if (name != null) {
 				name = name.replace(" ", "_");
 				name = name.replace("§", "&");
@@ -79,7 +83,7 @@ public abstract class MobListener implements Listener {
 		//Retrieve the more specific type of the mob if there is one
 		//ex. Wither Skeleton as opposed to normal Skeleton
 		//    or a Priest rather than a normal Villager
-		String type = (entity instanceof Player) ? "Player" : entity.getType().getName();
+		String type = (entity instanceof Player) ? "Player" : entity.getType().name();
 		String specificType = null;
 		if (mobTypes) {
 			switch (entity.getType()) {
@@ -87,15 +91,16 @@ public abstract class MobListener implements Listener {
 				case ZOMBIE: //'BabyVillager' | 'Baby' | 'Villager' | 'Normal'
 					Zombie zombie = (Zombie) entity;
 					if (zombie.isBaby()) {
-						specificType = zombie.isVillager() ? "BabyVillager" : "Baby";
-					} else if (zombie.isVillager()) {
+						if (zombie instanceof ZombieVillager) {
+							specificType = "BabyVillager";
+						} else {
+							specificType = "Baby";
+						}
+					} else if (zombie instanceof ZombieVillager) {
 						specificType = "Villager";
 					} else {
 						specificType = "Normal";
 					}
-					break;
-				case SKELETON: //'Wither' | 'Normal'
-					specificType = toCamelCase(((Skeleton) entity).getSkeletonType());
 					break;
 				case VILLAGER: //Profession
 					specificType = toCamelCase(((Villager) entity).getProfession());
@@ -104,10 +109,15 @@ public abstract class MobListener implements Listener {
 					Creeper creeper = (Creeper) entity;
 					specificType = creeper.isPowered() ? "Powered" : "Normal";
 					break;
+				case DONKEY:
+				case LLAMA:
+				case MULE:
+				case ZOMBIE_HORSE:
+				case SKELETON_HORSE:
 				case HORSE: //Color + Style (type is also determined by variant
-					Horse horse = (Horse) entity;
-					type = toCamelCase(horse.getVariant());
-					if (horse.getVariant() == Variant.HORSE) {
+					type = toCamelCase(entity.getType());
+					if (entity.getType() == EntityType.HORSE) {
+						Horse horse = (Horse) entity;
 						specificType = toCamelCase(horse.getColor());
 						switch (horse.getStyle()) {
 							case WHITE_DOTS:
@@ -136,7 +146,11 @@ public abstract class MobListener implements Listener {
 		//Check if the entity is a baby
 		if (entity instanceof Ageable && !((Ageable) entity).isAdult()) {
 			//Amend 'Baby' to the beginning of the specific type
-			specificType = specificType == null ? "Baby" : "Baby" + specificType;
+			if (specificType == null) {
+				specificType = "Baby";
+			} else {
+				specificType = "Baby" + specificType;
+			}
 		}
 
 		//Check if the mob is within a region
@@ -200,11 +214,11 @@ public abstract class MobListener implements Listener {
 		}
 		String s = type.name();
 		String[] parts = s.split("_");
-		String camelCaseString = "";
+		StringBuilder camelCaseString = new StringBuilder();
 		for (String part : parts) {
-			camelCaseString = camelCaseString + toProperCase(part);
+			camelCaseString.append(toProperCase(part));
 		}
-		return camelCaseString;
+		return camelCaseString.toString();
 	}
 
 	private static String toProperCase(String s) {
