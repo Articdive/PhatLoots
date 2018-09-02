@@ -137,14 +137,14 @@ public class CommandLoot extends Loot {
 	@Override
 	public ItemStack getInfoStack() {
 		//A CommandLoot is represented by a Command Block
-		ItemStack infoStack = new ItemStack(Material.LEGACY_COMMAND);
+		ItemStack infoStack = new ItemStack(Material.COMMAND_BLOCK);
 
 		//Set the display name of the item
 		ItemMeta info = Bukkit.getItemFactory().getItemMeta(infoStack.getType());
 		info.setDisplayName("§2Command");
 
 		//Add more specific details of the command
-		List<String> details = new ArrayList();
+		List<String> details = new ArrayList<>();
 		details.add("§4Probability: §6" + probability);
 		details.add("§4Command: §6" + command);
 		details.add(fromConsole ? "§6From Console" : "§6From Player");

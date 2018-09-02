@@ -20,7 +20,7 @@ public class Tool {
 	private final ItemStack item;
 
 	static {
-		ItemStack item = new ItemStack(Material.LEGACY_LEASH);
+		ItemStack item = new ItemStack(Material.LEAD);
 		ItemMeta meta = Bukkit.getItemFactory().getItemMeta(item.getType());
 		List<String> lore = new ArrayList<>();
 		meta.setDisplayName("§2Navigate/Move (Click to change Tool)");

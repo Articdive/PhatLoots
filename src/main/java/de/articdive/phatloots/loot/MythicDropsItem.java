@@ -18,6 +18,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ public class MythicDropsItem extends Loot {
 	 */
 	public static void registerButtonAndTool() {
 		//Register the Add Collection Button
-		ItemStack item = new ItemStack(Material.LEGACY_ENCHANTMENT_TABLE);
+		ItemStack item = new ItemStack(Material.ENCHANTING_TABLE);
 		ItemMeta info = Bukkit.getItemFactory().getItemMeta(item.getType());
 		List<String> uses = new ArrayList<>();
 		info.setDisplayName("§2Add new MythicDrops Item...");
@@ -94,7 +95,7 @@ public class MythicDropsItem extends Loot {
 		InventoryListener.registerButton(new AddMythicDropsItemButton(item));
 
 
-		item = new ItemStack(Material.LEGACY_ENCHANTMENT_TABLE);
+		item = new ItemStack(Material.ENCHANTING_TABLE);
 		ItemMeta meta = Bukkit.getItemFactory().getItemMeta(item.getType());
 		List<String> lore = new ArrayList<>();
 		meta.setDisplayName("§2MythicDrops Toggle (Click to change Tool)");
@@ -190,7 +191,9 @@ public class MythicDropsItem extends Loot {
 			ItemStack mis = MythicDropsPlugin.getNewDropBuilder().useDurability(false)
 					.withItemGenerationReason(ItemGenerationReason.EXTERNAL).withTier(tier).build();
 			if (durabilityLower > 0 || durabilityUpper > 0) {
-				mis.setDurability(ItemStackUtil.getDurabilityForMaterial(mis.getType(), durabilityLower, durabilityUpper));
+				ItemMeta meta = mis.getItemMeta();
+				((Damageable) meta).setDamage(ItemStackUtil.getDurabilityForMaterial(mis.getType(), durabilityLower, durabilityUpper));
+				mis.setItemMeta(meta);
 			}
 			lootBundle.addItem(mis);
 			amount--;
@@ -205,14 +208,14 @@ public class MythicDropsItem extends Loot {
 	@Override
 	public ItemStack getInfoStack() {
 		//A MythicDropsItem is represented by an Enchantment Table
-		ItemStack infoStack = new ItemStack(Material.LEGACY_ENCHANTMENT_TABLE);
+		ItemStack infoStack = new ItemStack(Material.ENCHANTING_TABLE);
 
 		//Set the display name of the item
 		ItemMeta info = Bukkit.getItemFactory().getItemMeta(infoStack.getType());
 		info.setDisplayName("§2MythicDrops Item");
 
 		//Add more specific details of the item
-		List<String> details = new ArrayList();
+		List<String> details = new ArrayList<>();
 		details.add("§1Tier: §6" + tierName);
 		details.add("§1Probability: §6" + getProbability());
 		if (amountLower == amountUpper) {

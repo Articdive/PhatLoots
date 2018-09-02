@@ -15,6 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -128,7 +129,9 @@ public class UnidentifiedItem extends Loot {
 				Material material = ItemUtil.getRandomMaterialFromCollection(materials);
 				ItemStack mis = new com.tealcube.minecraft.bukkit.mythicdrops.identification.UnidentifiedItem(material);
 				if (durabilityLower > 0 || durabilityUpper > 0) {
-					mis.setDurability(ItemStackUtil.getDurabilityForMaterial(mis.getType(), durabilityLower, durabilityUpper));
+					Damageable meta = (Damageable) mis.getItemMeta();
+					meta.setDamage(ItemStackUtil.getDurabilityForMaterial(mis.getType(), durabilityLower, durabilityUpper));
+					mis.setItemMeta((ItemMeta) meta);
 				}
 
 				//Place the tier name as the last line of lore
@@ -137,7 +140,7 @@ public class UnidentifiedItem extends Loot {
 						: Bukkit.getItemFactory().getItemMeta(material);
 				List<String> lore = meta.hasLore()
 						? meta.getLore()
-						: new ArrayList<String>();
+						: new ArrayList<>();
 				lore.add(PhatLootsConfig.tierPrefix + tierName);
 				meta.setLore(lore);
 				mis.setItemMeta(meta);
@@ -163,7 +166,7 @@ public class UnidentifiedItem extends Loot {
 		info.setDisplayName("§2Unidentified Item");
 
 		//Add more specific details of the item
-		List<String> details = new ArrayList();
+		List<String> details = new ArrayList<>();
 		details.add("§1Tier: §6" + tierName);
 		details.add("§1Probability: §6" + getProbability());
 		if (amountLower == amountUpper) {

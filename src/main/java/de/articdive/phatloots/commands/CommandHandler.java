@@ -41,20 +41,9 @@ public class CommandHandler implements CommandExecutor {
 		}
 	}
 
-	private static final Comparator<Method> METHOD_COMPARATOR = new Comparator() {
-		@Override
-		public int compare(Object o1, Object o2) {
-			return Double.compare(((Method) o1).getAnnotation(CodCommand.class).weight(),
-					((Method) o2).getAnnotation(CodCommand.class).weight());
-		}
-	};
+	private static final Comparator<Method> METHOD_COMPARATOR = Comparator.comparingDouble(o -> o.getAnnotation(CodCommand.class).weight());
 
-	private static final Comparator<CodCommand> CODCOMMAND_COMPARATOR = new Comparator() {
-		@Override
-		public int compare(Object o1, Object o2) {
-			return Double.compare(((CodCommand) o1).weight(), ((CodCommand) o2).weight());
-		}
-	};
+	private static final Comparator<CodCommand> CODCOMMAND_COMPARATOR = Comparator.comparingDouble(CodCommand::weight);
 
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)

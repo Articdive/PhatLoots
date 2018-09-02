@@ -189,7 +189,7 @@ public class LootCommandUtil {
 				}
 
 				for (Enchantment enchant : Enchantment.values()) {
-					if (enchant.getName().equalsIgnoreCase(split)) {
+					if (enchant.getKey().getKey().equalsIgnoreCase(split)) {
 						enchantment = enchant;
 					}
 				}

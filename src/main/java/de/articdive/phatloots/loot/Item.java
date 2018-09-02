@@ -12,6 +12,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.BufferedReader;
@@ -231,7 +232,7 @@ public class Item extends Loot {
 			details = info.getLore();
 			details.add("§1-----------------------------");
 		} else {
-			details = new ArrayList();
+			details = new ArrayList<>();
 		}
 		details.add(ChatColor.DARK_BLUE + "Probability: " + ChatColor.GOLD + probability);
 		if (amountBonus == 0) {
@@ -328,7 +329,7 @@ public class Item extends Loot {
 	 */
 	public void setDurability(short durability) {
 		if (durability >= 0) {
-			item.setDurability(durability);
+			((Damageable)item.getItemMeta()).setDamage(durability);
 		}
 	}
 
@@ -373,7 +374,7 @@ public class Item extends Loot {
 			}
 
 			for (Enchantment enchantment : enchantments) {
-				String key = type + '.' + enchantment.getName();
+				String key = type + '.' + enchantment.getKey().getKey();
 				if (enchantmentConfig.contains(key)) {
 					//Roll to discover which level the enchantment should be
 					ConfigurationSection config = enchantmentConfig.getConfigurationSection(key);
@@ -402,7 +403,7 @@ public class Item extends Loot {
 
 		if (durabilityBonus > 0) {
 			//Roll for the durability of the item
-			clone.setDurability((short) (clone.getDurability() + PhatLootsUtil.rollForInt(durabilityBonus)));
+			((Damageable) clone.getItemMeta()).setDamage((short) (((Damageable) clone.getItemMeta()).getDamage() + PhatLootsUtil.rollForInt(durabilityBonus)));
 		}
 
 		ItemMeta meta = clone.hasItemMeta()
@@ -651,7 +652,7 @@ public class Item extends Loot {
 			type = ARMOR;
 			enchantment = Enchantment.PROTECTION_FIRE;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
@@ -660,14 +661,14 @@ public class Item extends Loot {
 					? Enchantment.THORNS
 					: Enchantment.DURABILITY;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
 			}
 			enchantment = getTrump(enchantments, Enchantment.PROTECTION_ENVIRONMENTAL, Enchantment.PROTECTION_PROJECTILE, Enchantment.PROTECTION_EXPLOSIONS);
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.append(' ');
 				nameBuilder.append(lore);
@@ -676,7 +677,7 @@ public class Item extends Loot {
 			type = SWORD;
 			enchantment = getTrump(enchantments, Enchantment.DAMAGE_ARTHROPODS, Enchantment.DAMAGE_ALL);
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.replace(nameBuilder.length() - 5, nameBuilder.length(), lore);
 			}
@@ -684,21 +685,21 @@ public class Item extends Loot {
 					? Enchantment.FIRE_ASPECT
 					: Enchantment.DURABILITY;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
 			}
 			enchantment = Enchantment.LOOT_BONUS_MOBS;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.append(' ');
 				nameBuilder.append(lore);
 			}
 			enchantment = getTrump(enchantments, Enchantment.KNOCKBACK, Enchantment.DAMAGE_UNDEAD);
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.append(' ');
 				nameBuilder.append(lore);
@@ -707,7 +708,7 @@ public class Item extends Loot {
 			type = AXE;
 			enchantment = getTrump(enchantments, Enchantment.DAMAGE_ARTHROPODS, Enchantment.DAMAGE_ALL);
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.replace(nameBuilder.length() - 3, nameBuilder.length(), lore);
 			}
@@ -715,21 +716,21 @@ public class Item extends Loot {
 					? Enchantment.FIRE_ASPECT
 					: Enchantment.DURABILITY;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
 			}
 			enchantment = Enchantment.LOOT_BONUS_MOBS;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.append(' ');
 				nameBuilder.append(lore);
 			}
 			enchantment = getTrump(enchantments, Enchantment.KNOCKBACK, Enchantment.DAMAGE_UNDEAD);
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.append(' ');
 				nameBuilder.append(lore);
@@ -738,13 +739,13 @@ public class Item extends Loot {
 			type = PICKAXE;
 			enchantment = Enchantment.DIG_SPEED;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.replace(nameBuilder.length() - 7, nameBuilder.length(), lore);
 			}
 			enchantment = Enchantment.DURABILITY;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
@@ -753,13 +754,13 @@ public class Item extends Loot {
 			type = SPADE;
 			enchantment = Enchantment.DIG_SPEED;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.replace(nameBuilder.length() - 5, nameBuilder.length(), lore);
 			}
 			enchantment = Enchantment.DURABILITY;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
@@ -768,7 +769,7 @@ public class Item extends Loot {
 			type = HOE;
 			enchantment = Enchantment.DURABILITY;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
@@ -777,34 +778,34 @@ public class Item extends Loot {
 			type = BOW;
 			enchantment = Enchantment.ARROW_DAMAGE;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.replace(0, 3, lore);
 			}
 			enchantment = Enchantment.DURABILITY;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
 			}
 			enchantment = Enchantment.ARROW_FIRE;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.insert(0, ' ');
 				nameBuilder.insert(0, lore);
 			}
 			enchantment = Enchantment.ARROW_INFINITE;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.append(' ');
 				nameBuilder.append(lore);
 			}
 			enchantment = Enchantment.ARROW_KNOCKBACK;
 			level = getLevel(enchantments, enchantment);
-			lore = loreConfig.getString(type + '.' + enchantment.getName() + '.' + level);
+			lore = loreConfig.getString(type + '.' + enchantment.getKey().getKey() + '.' + level);
 			if (lore != null) {
 				nameBuilder.append(' ');
 				nameBuilder.append(lore);
@@ -823,7 +824,7 @@ public class Item extends Loot {
 
 		Map<Enchantment, Integer> enchantments = item.getEnchantments();
 		for (Enchantment e : enchantments.keySet()) {
-			tier += tiersConfig.getInt(ENCHANTMENT_VALUES + DIVIDER + e.getName() + DIVIDER + enchantments.get(e));
+			tier += tiersConfig.getInt(ENCHANTMENT_VALUES + DIVIDER + e.getKey().getKey() + DIVIDER + enchantments.get(e));
 		}
 
 		//Add the suffix and prefix for the given tier

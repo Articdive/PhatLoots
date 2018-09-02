@@ -135,7 +135,7 @@ public class InventoryListener implements Listener {
 						} else {
 							break;
 						}
-						event.setCursor(null);
+						event.getView().setCursor(null);
 						return;
 					}
 					break;
@@ -209,10 +209,10 @@ public class InventoryListener implements Listener {
 							if (stack.getType() != Material.AIR || l == null) { //Pick up Item (Add loot)
 								loot = new Item(stack, 0);
 								holding.put(playerUUID, loot);
-								event.setCursor(loot.getInfoStack());
+								event.getView().setCursor(loot.getInfoStack());
 								event.setCurrentItem(null);
 							} else { //Pick up nothing
-								event.setCursor(null);
+								event.getView().setCursor(null);
 							}
 							if (l != null && l instanceof Item) { //Put down Item
 								event.setCurrentItem(((Item) l).getItem());
@@ -268,7 +268,7 @@ public class InventoryListener implements Listener {
 			if (inv.getTitle().endsWith("Loot Tables")) { //Default View
 				ItemStack infoStack;
 				ItemMeta info = Bukkit.getItemFactory().getItemMeta(Material.STONE); //Block type doesn't really matter
-				List<String> details = new ArrayList();
+				List<String> details = new ArrayList<>();
 
 				switch (slot) {
 					case SIZE - 3: //Toggle Break and Respawn
@@ -278,7 +278,7 @@ public class InventoryListener implements Listener {
 						phatLoot.breakAndRespawn = !phatLoot.breakAndRespawn;
 
 						//Show the break and respawn status
-						infoStack = new ItemStack(phatLoot.breakAndRespawn ? Material.LEGACY_MOB_SPAWNER : Material.CHEST);
+						infoStack = new ItemStack(phatLoot.breakAndRespawn ? Material.SPAWNER : Material.CHEST);
 						info.setDisplayName("§4Break and Respawn: §6" + phatLoot.breakAndRespawn);
 						if (phatLoot.breakAndRespawn) {
 							details.add("§6This chest will break after it is looted");
@@ -296,7 +296,11 @@ public class InventoryListener implements Listener {
 						phatLoot.autoLoot = !phatLoot.autoLoot;
 
 						//Show the autoloot status
-						infoStack = new ItemStack(phatLoot.autoLoot ? Material.LEGACY_REDSTONE_TORCH_ON : Material.LEVER);
+						if (phatLoot.autoLoot) {
+							infoStack = new ItemStack(Material.REDSTONE_TORCH);
+						} else {
+							infoStack = new ItemStack(Material.LEVER);
+						}
 						info.setDisplayName("§4AutoLoot: §6" + phatLoot.autoLoot);
 						break;
 
@@ -319,7 +323,7 @@ public class InventoryListener implements Listener {
 						}
 
 						//Show the Reset Time
-						infoStack = new ItemStack(Material.LEGACY_WATCH);
+						infoStack = new ItemStack(Material.CLOCK);
 						info.setDisplayName("§2Reset Time");
 						details.add("§4Days: §6" + phatLoot.days);
 						details.add("§4Hours: §6" + phatLoot.hours);
@@ -351,7 +355,7 @@ public class InventoryListener implements Listener {
 							if (holding.containsKey(playerUUID)) { //Place Loot in Collection
 								Loot l = holding.remove(playerUUID);
 								((LootCollection) loot).addLoot(l);
-								event.setCursor(null);
+								event.getView().setCursor(null);
 							} else { //Enter LootCollection
 								viewCollection(player, ((LootCollection) loot).name);
 							}
@@ -364,10 +368,10 @@ public class InventoryListener implements Listener {
 							holding.put(playerUUID, lootList.get(slot));
 							lootList.set(slot, l);
 							event.setCurrentItem(event.getCursor()); //Put down Loot
-							event.setCursor(stack); //Pick up new Loot
+							event.getView().setCursor(stack); //Pick up new Loot
 						} else { //Pick up Loot
 							holding.put(playerUUID, lootList.remove(slot));
-							event.setCursor(stack);
+							event.getView().setCursor(stack);
 							refreshPage(player, inv, lootList); //Shifts remaining loot down
 						}
 						break;
@@ -381,10 +385,10 @@ public class InventoryListener implements Listener {
 								holding.put(playerUUID, lootList.get(slot));
 								lootList.set(slot, l);
 								event.setCurrentItem(event.getCursor()); //Put down Loot
-								event.setCursor(stack); //Pick up new Loot
+								event.getView().setCursor(stack);
 							} else { //Pick up Loot
 								holding.put(playerUUID, lootList.remove(slot));
-								event.setCursor(stack);
+								event.getView().setCursor(stack);
 								refreshPage(player, inv, lootList); //Shifts remaining loot down
 							}
 						} else if (slot > 0) { //Move Loot Left
@@ -539,10 +543,10 @@ public class InventoryListener implements Listener {
 		ItemMeta info;
 
 		//Display the Reset Time
-		infoStack = new ItemStack(Material.LEGACY_WATCH);
+		infoStack = new ItemStack(Material.CLOCK);
 		info = Bukkit.getItemFactory().getItemMeta(infoStack.getType());
 		info.setDisplayName("§2Reset Time");
-		List<String> details = new ArrayList();
+		List<String> details = new ArrayList<>();
 		details.add("§4Days: §6" + phatLoot.days);
 		details.add("§4Hours: §6" + phatLoot.hours);
 		details.add("§4Minutes: §6" + phatLoot.minutes);
@@ -557,7 +561,11 @@ public class InventoryListener implements Listener {
 		inv.setItem(index, infoStack);
 
 		//Display the autoloot status
-		infoStack = new ItemStack(phatLoot.autoLoot ? Material.LEGACY_REDSTONE_TORCH_ON : Material.LEVER);
+		if (phatLoot.autoLoot) {
+			infoStack = new ItemStack(Material.REDSTONE_TORCH);
+		} else {
+			infoStack = new ItemStack(Material.LEVER);
+		}
 		info = Bukkit.getItemFactory().getItemMeta(infoStack.getType());
 		info.setDisplayName("§4AutoLoot: §6" + phatLoot.autoLoot);
 		infoStack.setItemMeta(info);
@@ -565,10 +573,14 @@ public class InventoryListener implements Listener {
 		inv.setItem(index, infoStack);
 
 		//Display the break and respawn status
-		infoStack = new ItemStack(phatLoot.breakAndRespawn ? Material.LEGACY_MOB_SPAWNER : Material.CHEST);
+		if (phatLoot.breakAndRespawn) {
+			infoStack = new ItemStack(Material.SPAWNER);
+		} else {
+			infoStack = new ItemStack(Material.CHEST);
+		}
 		info = Bukkit.getItemFactory().getItemMeta(infoStack.getType());
 		info.setDisplayName("§4Break and Respawn: §6" + phatLoot.breakAndRespawn);
-		details = new ArrayList();
+		details = new ArrayList<>();
 		if (phatLoot.breakAndRespawn) {
 			details.add("§6This chest will break after it is looted");
 			details.add("§6and respawn once it may be looted again.");
@@ -582,7 +594,7 @@ public class InventoryListener implements Listener {
 		inv.setItem(index, infoStack);
 
 		//Store the current view in the Player's stack
-		pageStacks.put(player.getUniqueId(), new Stack<Inventory>());
+		pageStacks.put(player.getUniqueId(), new Stack<>());
 
 		infoViewers.put(player.getUniqueId(), phatLoot);
 		switchView(player, inv);
@@ -622,7 +634,7 @@ public class InventoryListener implements Listener {
 		item = new ItemStack(Material.LADDER);
 		info = Bukkit.getItemFactory().getItemMeta(item.getType());
 		info.setDisplayName("§2Up to...");
-		List<String> details = new ArrayList();
+		List<String> details = new ArrayList<>();
 		details.add("§6" + pageStacks.get(player.getUniqueId()).peek().getTitle());
 		info.setLore(details);
 		item.setItemMeta(info);

@@ -101,14 +101,14 @@ public class MythicMobsItem extends Loot {
 	@Override
 	public ItemStack getInfoStack() {
 		//A MythicDropsItem is represented by an Enchantment Table
-		ItemStack infoStack = new ItemStack(Material.LEGACY_ENCHANTMENT_TABLE);
+		ItemStack infoStack = new ItemStack(Material.ENCHANTING_TABLE);
 
 		//Set the display name of the item
 		ItemMeta info = Bukkit.getItemFactory().getItemMeta(infoStack.getType());
 		info.setDisplayName("§2MythicMobs Item");
 
 		//Add more specific details of the item
-		List<String> details = new ArrayList();
+		List<String> details = new ArrayList<>();
 		details.add("§qItem ID: §6" + itemId);
 		details.add("§1Probability: §6" + getProbability());
 		if (amountLower == amountUpper) {
