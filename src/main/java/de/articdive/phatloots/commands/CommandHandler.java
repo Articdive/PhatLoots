@@ -28,7 +28,7 @@ import java.util.logging.Level;
     I removed javadoc references for "command", they don't appear to function or do anything.
 */
 public class CommandHandler implements CommandExecutor {
-	private static enum ParameterType {
+	private enum ParameterType {
 		STRING, INT, DOUBLE, BOOLEAN, MATERIAL, PLAYER, OFFLINEPLAYER,
 		WORLD, PHATLOOT;
 
